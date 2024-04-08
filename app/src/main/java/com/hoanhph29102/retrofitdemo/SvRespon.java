@@ -1,10 +1,10 @@
 package com.hoanhph29102.retrofitdemo;
 
 public class SvRespon {
-    private TestModel[] sinhviens;
+    private SinhVien[] sinhviens;
     private String message;
 
-    public TestModel[] getSinhviens() {
+    public SinhVien[] getSinhviens() {
         return sinhviens;
     }
 

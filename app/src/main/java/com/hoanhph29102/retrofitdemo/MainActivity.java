@@ -1,18 +1,21 @@
 package com.hoanhph29102.retrofitdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.annotations.SerializedName;
 import com.hoanhph29102.retrofitdemo.retrofit.ApiService;
+import com.hoanhph29102.retrofitdemo.retrofit.RetrofitClient;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -23,11 +26,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     EditText edTen, edMa;
-    Button btnInsert, btnUpdate, btnDel, btnSelect;
+    Button btnInsert, btnSelect;
 
     TextView tvKQ;
-    List<TestModel> list;
+    List<SinhVien> list;
     String kq = "";
+
+    SinhVienAdapter sinhVienAdapter;
+    RecyclerView rcSV;
+    @SerializedName("masv")
+    String masv;
+    @SerializedName("tensv")
+    String tensv;
+
+    SinhVien sinhVien;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,41 +50,45 @@ public class MainActivity extends AppCompatActivity {
         edMa = findViewById(R.id.ed_ma);
         edTen = findViewById(R.id.ed_ten);
         btnInsert = findViewById(R.id.btn_insert);
-        btnUpdate = findViewById(R.id.btn_update);
-        btnDel = findViewById(R.id.btn_delete);
+
         btnSelect = findViewById(R.id.btn_select);
-        tvKQ = findViewById(R.id.tv_kq);
+        //tvKQ = findViewById(R.id.tv_kq);
+        rcSV = findViewById(R.id.rc_sinh_vien);
 
         btnInsert.setOnClickListener(v -> insertRetrofit());
         btnSelect.setOnClickListener(view -> getAllSV());
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        rcSV.setLayoutManager(linearLayoutManager);
     }
 
-    private void getAllSV(){
+    public void getAllSV(){
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.172:3002/")
-                .addConverterFactory(GsonConverterFactory.create()).build();
+        ApiService apiService = RetrofitClient.getRetrofit().create(ApiService.class);
+        Call<List<SinhVien>> call = apiService.getAllSV();
 
-        ApiService apiService= retrofit.create(ApiService.class);
-        Call<List<TestModel>> call = apiService.getAllSV();
-
-        call.enqueue(new Callback<List<TestModel>>() {
+        call.enqueue(new Callback<List<SinhVien>>() {
             @Override
-            public void onResponse(Call<List<TestModel>> call, Response<List<TestModel>> response) {
+            public void onResponse(Call<List<SinhVien>> call, Response<List<SinhVien>> response) {
                 if (response.isSuccessful()){
-                    List<TestModel> svRespon = response.body();
+                    list = response.body();
 
+//                    for (SinhVien t : listSV){
+//                        kq += "tên : " + t.getTensv()+";" +"mã: " + t.getMasv()+"\n";
+//                    }
+//                    tvKQ.setText(kq);
 
-                    for (TestModel t : svRespon){
-                        kq += "tên : " + t.getTensv()+";" +"mã: " + t.getMasv()+"\n";
-                    }
-                    tvKQ.setText(kq);
+                    sinhVienAdapter = new SinhVienAdapter(MainActivity.this,list, MainActivity.this);
+                    rcSV.setAdapter(sinhVienAdapter);
+                } else {
+                    Toast.makeText(MainActivity.this, "GET khong thanh cong", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<TestModel>> call, Throwable t) {
-                tvKQ.setText(t.getMessage());
+            public void onFailure(Call<List<SinhVien>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, ""+t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.d("Main", "err"+ t.getMessage());
             }
         });
@@ -79,37 +96,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void insertRetrofit(){
 
-        TestModel testModel = new TestModel();
+        masv = edMa.getText().toString();
+        tensv = edTen.getText().toString();
 
-        String masv = edMa.getText().toString();
-        String tensv = edTen.getText().toString();
+        sinhVien = new SinhVien(masv,tensv);
 
-        testModel.setTensv(tensv);
-        testModel.setMasv(masv);
+        ApiService apiService= RetrofitClient.getRetrofit().create(ApiService.class);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.172:3002/")
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        ApiService apiService= retrofit.create(ApiService.class);
-
-        Call<SvRespon> call = apiService.insert(tensv,masv);
+        Call<SvRespon> call = apiService.insert(masv,tensv);
 
         call.enqueue(new Callback<SvRespon>() {
             @Override
             public void onResponse(Call<SvRespon> call, Response<SvRespon> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     SvRespon svRespon = response.body();
-                    tvKQ.setText(svRespon.getMessage());
+                    Toast.makeText(MainActivity.this, ""+svRespon.getMessage(), Toast.LENGTH_SHORT).show();
+                    getAllSV();
                 } else {
                     // Xử lý trường hợp phản hồi không hợp lệ hoặc không có dữ liệu
-                    tvKQ.setText("Không có dữ liệu trả về từ server");
+                    Toast.makeText(MainActivity.this, "Thất bại", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<SvRespon> call, Throwable t) {
-                tvKQ.setText(t.getMessage());
+                Toast.makeText(MainActivity.this, ""+t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.d("err","err" + t.getMessage());
             }
         });
