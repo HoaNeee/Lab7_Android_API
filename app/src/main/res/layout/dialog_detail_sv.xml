@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mã sinh viên: "
+            android:textSize="18dp"
+            android:textStyle="bold"
+            />
+        <EditText
+            android:id="@+id/ed_ma_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ma sv"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên sinh viên: "
+            android:textSize="18dp"
+            android:textStyle="bold"
+            />
+        <EditText
+            android:id="@+id/ed_ten_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ten sv"
+            />
+    </LinearLayout>
+    <Button
+        android:id="@+id/btn_update_sv_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="UPDATE"
+        />
+</LinearLayout>
